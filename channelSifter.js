@@ -1,16 +1,16 @@
 const fs = require('fs');
 
 
-function channel_extractor(){
+function channel_sifter(){
 
     const arr_original = fs.readFileSync('original_links.txt', 'utf-8').split('\n');
-    const arr_new = fs.readFileSync('set_raw.txt', 'utf-8').split('\n');
+    const arr_new = fs.readFileSync('new_links.txt', 'utf-8').split('\n');
+
 
     
     let fileContent = '';
     arr_new.forEach((item) => {
-        if(!arr_original.includes(item))
-        fileContent += `${item}\n`; // Append each item followed by a newline
+        if(!arr_original.includes(item)) fileContent += `${item}\n`; // Append each item followed by a newline
     });
     
     // Write to 'set_raw.txt'
@@ -24,4 +24,4 @@ function channel_extractor(){
 }
 
 
-// channel_extractor()
+channel_sifter()

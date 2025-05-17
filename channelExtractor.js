@@ -23,4 +23,4 @@ function channel_extractor(){
 }
 
 
-channel_extractor()
+// channel_extractor()
