@@ -10,6 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "puppeteer": "^23.11.1",
+    "puppeteer-extra": "^3.3.6"
   }
 }
