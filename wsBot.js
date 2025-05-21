@@ -12,7 +12,7 @@ const puppeteerInit = async () => {
   //Launches a browser instance
   const browser = await puppeteer.launch({
     ignoreDefaultArgs: ["--disable-extensions"],
-    headless: false,
+    headless: true,
     args: ["--no-sandbox", "--disabled-setupid-sandbox", "--start-maximized"],
   });
 
@@ -39,52 +39,58 @@ function appendToCsv(extnLink, myEmails) {
   const yString = myEmails.join(",");
 
   // Create CSV line
-  const csvLine = `"${extnLink}",${yString}\n`;
+  const csvLine = `${extnLink},${yString}\n`;
 
   // Append to file (creates file if it doesn't exist)
   fs.appendFile(csvFilePath, csvLine, (err) => {
     if (err) {
       console.error("Error writing to CSV:", err);
     } else {
-      console.log(`Appended to CSV: ${extnLink} and [${myEmails}]`);
+      console.log(`Appended emails: [${myEmails}]`);
     }
   });
 }
 
 const emailExtract = async () => {
+
   const page = await puppeteerInit();
 
   await page.setViewport({ width: 1920, height: 1080 });
 
   if (!page) return;
+
   const ws_raw_arr = fs.readFileSync("ws_raw.txt", "utf-8").split("\n");
 
-  ws_raw_arr.forEach(async el=>{
+  console.log(ws_raw_arr.length);
 
-      const sLink = el;
-    
-      const rez = await page.goto(sLink);
-    
-      console.log(rez);
+  for(let i=0; i<ws_raw_arr.length; i++){
+    try {
+      console.log("extracting on link number: ", i);
+      
+      let sLink = ws_raw_arr[i].trim();
+  
+      let rez = await page.goto(sLink);
+  
       if (rez?.status() !== 200) return;
-    
-      //   await delay(3000);
-    
+  
       await page.waitForFunction(
         "window.performance.timing.loadEventEnd - window.performance.timing.navigationStart >= 500"
       );
-    
+  
       // Getting the page source HTML
-      const pageSourceHTML = await page.content();
-    
-      const emailList = findEmailInString(pageSourceHTML);
-    
-      if (emailList !== null) {
+      let pageSourceHTML = await page.content();
+  
+      let emailList = findEmailInString(pageSourceHTML);
+  
+      if (emailList !== null && emailList.length > 0) {
         appendToCsv(sLink, emailList);
       }
+    } catch (error) {
+      console.log("error: ", error);
+      
+    }
 
-  })
-
+  }
 };
 
-emailExtract();
+// emailExtract();
