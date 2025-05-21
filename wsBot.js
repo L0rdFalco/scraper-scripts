@@ -25,7 +25,7 @@ function findEmailInString(text) {
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
   // Find all matches (returns array)
-  let  emails = text.match(emailRegex);
+  let emails = text.match(emailRegex);
 
   emails = Array.from(new Set(emails));
 
@@ -57,28 +57,34 @@ const emailExtract = async () => {
   await page.setViewport({ width: 1920, height: 1080 });
 
   if (!page) return;
+  const ws_raw_arr = fs.readFileSync("ws_raw.txt", "utf-8").split("\n");
 
-  const sLink = `https://chromewebstore.google.com/detail/ziplyne-jh-production-pla/phaofcagillefigmcbocnnllnflhkjce`;
+  ws_raw_arr.forEach(async el=>{
 
-  const rez = await page.goto(sLink);
+      const sLink = el;
+    
+      const rez = await page.goto(sLink);
+    
+      console.log(rez);
+      if (rez?.status() !== 200) return;
+    
+      //   await delay(3000);
+    
+      await page.waitForFunction(
+        "window.performance.timing.loadEventEnd - window.performance.timing.navigationStart >= 500"
+      );
+    
+      // Getting the page source HTML
+      const pageSourceHTML = await page.content();
+    
+      const emailList = findEmailInString(pageSourceHTML);
+    
+      if (emailList !== null) {
+        appendToCsv(sLink, emailList);
+      }
 
-  console.log(rez);
-  if (rez?.status() !== 200) return;
+  })
 
-//   await delay(3000);
-
-  await page.waitForFunction(
-    "window.performance.timing.loadEventEnd - window.performance.timing.navigationStart >= 500"
-  );
-
-  // Getting the page source HTML
-  const pageSourceHTML = await page.content();
-
-  const emailList = findEmailInString(pageSourceHTML);
-
-  if (emailList !== null) {
-    appendToCsv(sLink, emailList);
-  }
 };
 
 emailExtract();
